@@ -55,5 +55,3 @@ def get_relevant_papers_chemrxiv(
 # concat_metadata_from_chemrxiv(list_files, 'test.jsonl')
 # query=[['Li-metal']]
 # get_relevant_papers_chemrxiv(chemrxiv_jsonl_path='test.jsonl', query=query,query_result_path='./data/query_tmp.jsonl' ,pdf_path='./data/' )
-
-

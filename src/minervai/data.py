@@ -1,6 +1,6 @@
-from typing import TYPE_CHECKING
 
 import faiss
+from langchain_core.documents import Documents
 from langchain_community.vectorstores import FAISS
 from langchain_community.docstore.in_memory import InMemoryDocstore
 
@@ -31,22 +31,21 @@ def vector_db(database_name: str, embeddings: "Embeddings") -> FAISS:
         A FAISS vector database
 
     """
-    database_path=f'./data/{database_name}'
+    database_path = f"./data/{database_name}"
     try:
-        vector_store=FAISS.load_local(database_path, embeddings, allow_dangerous_deserialization=True)
-    except:
+        vector_store = FAISS.load_local(
+            database_path, embeddings, allow_dangerous_deserialization=True
+        )
+    except Exception as e:
+        print(e)
         index = faiss.IndexFlatL2(len(embeddings.embed_query("hello world")))
-        vector_store=FAISS(
+        vector_store = FAISS(
             embedding_function=embeddings,
             index=index,
             docstore=InMemoryDocstore(),
-            index_to_docstore_id={},)
+            index_to_docstore_id={},
+        )
     return vector_store
-
-    
-
-# def add_to_vector_db(vector_store: PGVector, documents: list["Document"]) -> list["Document"]:
-#     return vector_store.add_documents(documents)
 
 
 def load_document(document_path: str) -> "list[Document]":
@@ -76,8 +75,6 @@ def load_document(document_path: str) -> "list[Document]":
         is_separator_regex=False,
     )
 
-    
-
     return PDFMinerLoader(document_path).load_and_split(text_splitter)
 
 
@@ -102,19 +99,25 @@ def load_list_documents(document_paths: list) -> list["Document"]:
         documents.extend(load_document(document_path))
     return documents
 
-def add_document_to_db(documents: list["Documents"], vector_store: "FAISS", database_name: str) -> None:
-    TODO = "check if the document is already in the database"
+
+def add_document_to_db(
+    documents: list["Documents"], vector_store: "FAISS", database_name: str
+) -> None:
+    # TODO = "check if the document is already in the database"
     """
     Add a list of documents to a vector database
 
     Parameters
     ----------
-    
+
     """
     vector_store.add_documents(documents)
-    vector_store.save_local(f'./data/{database_name}')
+    vector_store.save_local(f"./data/{database_name}")
 
-def update_vector_db(database_name: str, embeddings: "Embeddings", document_paths: list) -> FAISS:
+
+def update_vector_db(
+    database_name: str, embeddings: "Embeddings", document_paths: list
+) -> FAISS:
     vector_store = vector_db(database_name, embeddings)
     documents = load_list_documents(document_paths)
     add_document_to_db(documents, vector_store, database_name)
