@@ -1,6 +1,4 @@
-
 import faiss
-from langchain_core.documents import Documents
 from langchain_community.vectorstores import FAISS
 from langchain_community.docstore.in_memory import InMemoryDocstore
 
@@ -12,6 +10,7 @@ from langchain_core.embeddings.embeddings import Embeddings
 
 # TODO: add additional metadata to documents
 # TODO: consider to use PyMuPDFLoader, more efficient and more complete metadata
+# TODO: check if the document is already in the database before adding it
 
 
 def vector_db(database_name: str, embeddings: "Embeddings") -> FAISS:
@@ -21,7 +20,7 @@ def vector_db(database_name: str, embeddings: "Embeddings") -> FAISS:
     Parameters
     ----------
     database_name : str
-        The name of the collection in the vector database
+        The name of the vector database
     embeddings : Embeddings
         The embeddings object to use for the vector database
 
@@ -100,10 +99,9 @@ def load_list_documents(document_paths: list) -> list["Document"]:
     return documents
 
 
-def add_document_to_db(
-    documents: list["Documents"], vector_store: "FAISS", database_name: str
+def add_documents_to_db(
+    documents: list["Document"], vector_store: "FAISS", database_name: str
 ) -> None:
-    # TODO = "check if the document is already in the database"
     """
     Add a list of documents to a vector database
 
@@ -120,5 +118,5 @@ def update_vector_db(
 ) -> FAISS:
     vector_store = vector_db(database_name, embeddings)
     documents = load_list_documents(document_paths)
-    add_document_to_db(documents, vector_store, database_name)
+    add_documents_to_db(documents, vector_store, database_name)
     return vector_store
