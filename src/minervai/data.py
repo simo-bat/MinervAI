@@ -1,26 +1,24 @@
 import faiss
-from langchain_community.vectorstores import FAISS
 from langchain_community.docstore.in_memory import InMemoryDocstore
-
-from langchain_community.document_loaders import PDFMinerLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-
+from langchain_community.document_loaders import PyMuPDFLoader
+from langchain_community.vectorstores import FAISS
 from langchain_core.documents import Document
 from langchain_core.embeddings.embeddings import Embeddings
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 # TODO: add additional metadata to documents
 # TODO: consider to use PyMuPDFLoader, more efficient and more complete metadata
 # TODO: check if the document is already in the database before adding it
 
 
-def vector_db(database_name: str, embeddings: "Embeddings") -> FAISS:
+def vector_db(vectro_db_path: str, embeddings: "Embeddings") -> FAISS:
     """
     load a FAISS vector database if it exists, otherwise create a new one
 
     Parameters
     ----------
-    database_name : str
-        The name of the vector database
+    vectro_db_path : str
+        The path of the vector database
     embeddings : Embeddings
         The embeddings object to use for the vector database
 
@@ -30,10 +28,10 @@ def vector_db(database_name: str, embeddings: "Embeddings") -> FAISS:
         A FAISS vector database
 
     """
-    database_path = f"./data/{database_name}"
+    # database_path = f"./data/{database_name}"
     try:
         vector_store = FAISS.load_local(
-            database_path, embeddings, allow_dangerous_deserialization=True
+            vectro_db_path, embeddings, allow_dangerous_deserialization=True
         )
     except Exception as e:
         print(e)
@@ -49,7 +47,7 @@ def vector_db(database_name: str, embeddings: "Embeddings") -> FAISS:
 
 def load_document(document_path: str) -> "list[Document]":
     """
-    Load a document from a bucket, split it and return a list of Document objects
+    Load a document from a folder, split it and return a list of Document objects
 
     Parameters
     ----------
@@ -73,8 +71,8 @@ def load_document(document_path: str) -> "list[Document]":
         length_function=len_func,
         is_separator_regex=False,
     )
-
-    return PDFMinerLoader(document_path).load_and_split(text_splitter)
+    return PyMuPDFLoader(document_path).load_and_split(text_splitter)
+    # return PDFMinerLoader(document_path).load_and_split(text_splitter)
 
 
 def load_list_documents(document_paths: list) -> list["Document"]:
@@ -100,7 +98,7 @@ def load_list_documents(document_paths: list) -> list["Document"]:
 
 
 def add_documents_to_db(
-    documents: list["Document"], vector_store: "FAISS", database_name: str
+    documents: list["Document"], vector_store: "FAISS", vector_db_path: str
 ) -> None:
     """
     Add a list of documents to a vector database
@@ -110,13 +108,13 @@ def add_documents_to_db(
 
     """
     vector_store.add_documents(documents)
-    vector_store.save_local(f"./data/{database_name}")
+    vector_store.save_local(vector_db_path)
 
 
 def update_vector_db(
-    database_name: str, embeddings: "Embeddings", document_paths: list
+    vector_db_path: str, embeddings: "Embeddings", document_paths: list
 ) -> FAISS:
-    vector_store = vector_db(database_name, embeddings)
+    vector_store = vector_db(vector_db_path, embeddings)
     documents = load_list_documents(document_paths)
-    add_documents_to_db(documents, vector_store, database_name)
+    add_documents_to_db(documents, vector_store, vector_db_path)
     return vector_store
