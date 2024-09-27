@@ -1,3 +1,5 @@
+import os
+
 import faiss
 from langchain_community.docstore.in_memory import InMemoryDocstore
 from langchain_community.document_loaders import PyMuPDFLoader
@@ -11,7 +13,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 # TODO: check if the document is already in the database before adding it
 
 
-def vector_db(vectro_db_path: str, embeddings: "Embeddings") -> FAISS:
+def vector_db(vector_db_path: str, embeddings: "Embeddings") -> FAISS:
     """
     load a FAISS vector database if it exists, otherwise create a new one
 
@@ -28,20 +30,19 @@ def vector_db(vectro_db_path: str, embeddings: "Embeddings") -> FAISS:
         A FAISS vector database
 
     """
-    # database_path = f"./data/{database_name}"
-    try:
+    if os.path.exists(os.path.join(vector_db_path, "index.faiss")):
         vector_store = FAISS.load_local(
-            vectro_db_path, embeddings, allow_dangerous_deserialization=True
+            vector_db_path, embeddings, allow_dangerous_deserialization=True
         )
-    except Exception as e:
-        print(e)
-        index = faiss.IndexFlatL2(len(embeddings.embed_query("hello world")))
+    else:
+        index = faiss.IndexFlatL2(len(embeddings.embed_query("my vector database")))
         vector_store = FAISS(
             embedding_function=embeddings,
             index=index,
             docstore=InMemoryDocstore(),
             index_to_docstore_id={},
         )
+        vector_store.save_local(vector_db_path)
     return vector_store
 
 
