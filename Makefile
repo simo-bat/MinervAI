@@ -1,60 +1,46 @@
 .PHONY: install
 install:
 	python -m pip install --upgrade pip
-	echo "https://${GITHUB_ACCESS_TOKEN}:@github.com" > ~/.git-credentials
-	git config --global credential.helper store
-	pip install -e . --upgrade --upgrade-strategy eager
-	rm -f ~/.git-credentials
+	pip install -r requirements.txt -U
+	pip install -e . --no-deps
 
-.PHONY: dev_install
-dev_install:
-	python -m pip install --upgrade pip
-	echo "https://${GITHUB_ACCESS_TOKEN}:@github.com" > ~/.git-credentials
-	git config --global credential.helper store
-	pip install -e .[dev] --upgrade --upgrade-strategy eager
-	rm -f ~/.git-credentials
-	pre-commit install
-
-.PHONY: install_uv
-install_uv:
-	# Note: assumes uv is installed and a virtual environment is already activated
-	echo "https://${GITHUB_ACCESS_TOKEN}:@github.com" > ~/.git-credentials
-	git config --global credential.helper store
-	uv pip install pip  # for mypy types installation
-	uv pip install -e . --upgrade
-	rm -f ~/.git-credentials
-
-.PHONY: dev_install_uv
-dev_install_uv:
-	# Note: assumes uv is installed and a virtual environment is already activated
-	echo "https://${GITHUB_ACCESS_TOKEN}:@github.com" > ~/.git-credentials
-	git config --global credential.helper store
-	uv pip install pip  # for mypy types installation
-	uv pip install -e .[dev] --upgrade
-	rm -f ~/.git-credentials
-	pre-commit install
-
-.PHONY: format
-format:
+.PHONY: ruff
+ruff:
 	ruff format .
 	ruff check . --fix
-	mypy . --install-types --ignore-missing-imports --non-interactive
 
-.PHONY: test_format
-test_format:
-	ruff format . --check
-	ruff check .
-	mypy . --install-types --ignore-missing-imports --non-interactive
+.PHONY: isort
+isort:
+	isort src --profile black --line-length=120
+	isort tests --profile black --line-length=120
+
+.PHONY: flake8
+flake8:
+	flake8 src --count --show-source --statistics
+
+.PHONY: mypy
+mypy:
+	mypy --install-types --ignore-missing-imports --non-interactive
 
 .PHONY: pytest
 pytest:
-	pytest --cov-report term-missing --cov=src tests/ -s
+	pytest tests/
 
-VERSION := ${shell python src/minervai/__init__.py}
+.PHONY: format
+format:
+	make ruff
+	make isort
+	make mypy
 
-#.PHONY: docker
-# docker:
-#	docker build . \
-#		--build-arg GIT_ACCESS_TOKEN=${GITHUB_ACCESS_TOKEN} \
-#		-t cuberg/PLACEHOLDER:${VERSION}
-#		-f deployment/Dockerfile .
+.PHONY: test
+test:
+	make install
+	make isort
+	make black
+	make flake8
+	make mypy
+	make pytest
+
+.PHONY: run
+run:
+	streamlit run src/minervai/app.py --theme.primaryColor="FFF700" --theme.base="dark"
