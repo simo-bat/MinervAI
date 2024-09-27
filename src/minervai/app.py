@@ -1,18 +1,22 @@
 import os
 
 import streamlit as st
-from langchain_community.vectorstores import FAISS
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
 
 from minervai.chain import conversational_rag_chain
 from minervai.chemrxiv_utils import get_metadata_from_chemrxiv, get_relevant_papers_chemrxiv
-from minervai.data import update_vector_db
+from minervai.data import update_vector_db, vector_db
 
 CHEMRXIV_DB_PATH = "./data/chemrxiv.jsonl"
 CHEMRXIV_QUERY_PATH = "./data/chemrxiv_query.jsonl"
 PDF_PATH = "./data/pdfs"
 VECTOR_DB = "./data/chemrxiv_db"
+
+if not os.path.exists(PDF_PATH):
+    os.makedirs(PDF_PATH)
+if not os.path.exists(VECTOR_DB):
+    os.makedirs(VECTOR_DB)
 
 GOOGLE_API_KEY = "AIzaSyCSfvhg0viV8eyQdLzr2yfI_I8qa5nGBWk"
 embeddings = GoogleGenerativeAIEmbeddings(
@@ -24,11 +28,7 @@ llm = ChatGoogleGenerativeAI(
 )
 
 
-vectorstore = FAISS.load_local(
-    VECTOR_DB,
-    embeddings,
-    allow_dangerous_deserialization=True,
-)
+vectorstore = vector_db(VECTOR_DB, embeddings)
 retriever = vectorstore.as_retriever()
 
 
@@ -64,7 +64,6 @@ def add_documents_from_chmerxiv():
             document_list = [
                 os.path.join(PDF_PATH, i) for i in document_list if i.endswith(".pdf")
             ]
-            print(document_list)
             _ = update_vector_db(
                 vector_db_path=VECTOR_DB,
                 embeddings=embeddings,
@@ -142,16 +141,16 @@ def chatbot():
         st.session_state.messages.append(message)
         st.session_state.chat_history.extend(chat_history)
 
+
 def main():
     st.title(" Chat with your documents")
     chatbot()
-    
+
     with st.sidebar:
         st.title("Add Documents to Collection")
         add_documents_from_chmerxiv()
         add_documents_from_local()
 
-    
 
 if __name__ == "__main__":
     main()
