@@ -142,11 +142,16 @@ def chatbot():
         st.session_state.messages.append(message)
         st.session_state.chat_history.extend(chat_history)
 
+def main():
+    st.title(" Chat with your documents")
+    chatbot()
+    
+    with st.sidebar:
+        st.title("Add Documents to Collection")
+        add_documents_from_chmerxiv()
+        add_documents_from_local()
 
-with st.sidebar:
-    st.title("Add Documents to Collection")
-    add_documents_from_chmerxiv()
-    add_documents_from_local()
+    
 
-st.title(" Chat with your documents")
-chatbot()
+if __name__ == "__main__":
+    main()
