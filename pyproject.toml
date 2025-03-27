@@ -1,0 +1,49 @@
+[project]
+name = "MinervAI"
+version = "0.1.0"
+description = "Chat with your documents"
+authors = [
+    {name = "simone", email = "simone.balatti@gmail.com"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+keywords = ["chemrxiv", "rag" ]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "langchain",
+    "langchain_community",
+    "langchain_google_genai",
+    "langchain_core",
+    "langchain_text_splitters",
+    "faiss-cpu",
+    "streamlit",
+    "paperscraper",
+    "pandas",
+    "pymupdf"  
+]
+
+requires-python = ">=3.10"
+
+[tool.black]
+line-length = 88
+target-version = ['py310']
+
+[tool.isort]
+profile = "black"
+
+[tool.flake8]
+max-line-length = 88
+exclude = ["tests/*", "venv/*"]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "--cov=your_project_name --cov-report=xml"
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
