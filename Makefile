@@ -19,7 +19,7 @@ flake8:
 
 .PHONY: mypy
 mypy:
-	mypy --install-types --ignore-missing-imports --non-interactive
+	mypy . --install-types --ignore-missing-imports --non-interactive
 
 .PHONY: pytest
 pytest:
