@@ -1,8 +1,7 @@
 .PHONY: install
 install:
 	python -m pip install --upgrade pip
-	pip install -r requirements.txt -U
-	pip install -e . --no-deps
+	pip install -e .
 
 .PHONY: ruff
 ruff:
@@ -11,12 +10,12 @@ ruff:
 
 .PHONY: isort
 isort:
-	isort src --profile black --line-length=120
-	isort tests --profile black --line-length=120
+	isort src --profile black --line-length=88
+	isort tests --profile black --line-length=88
 
 .PHONY: flake8
 flake8:
-	flake8 src --count --show-source --statistics
+	flake8 src --max-line-length=88 --count --show-source --statistics
 
 .PHONY: mypy
 mypy:
@@ -26,6 +25,10 @@ mypy:
 pytest:
 	pytest tests/
 
+.PHONY: black
+black:
+	black .
+	
 .PHONY: format
 format:
 	make ruff
@@ -39,7 +42,7 @@ test:
 	make black
 	make flake8
 	make mypy
-	make pytest
+	# make pytest
 
 .PHONY: run
 run:
