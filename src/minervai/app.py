@@ -1,10 +1,10 @@
 import os
 
 import streamlit as st
+from langchain.chat_models import ChatOpenAI
+from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
-from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.chat_models import ChatOpenAI
 
 from minervai.chain import conversational_rag_chain
 from minervai.data import update_vector_db, vector_db
@@ -28,9 +28,7 @@ def get_info():
     container = st.container(border=True)
     container.markdown("### LLM API ")
     cols = container.columns(2, vertical_alignment="bottom")
-    llm_option = cols[0].selectbox(
-        "Select Models", ["Gemini", "OpenAI"]
-    )
+    llm_option = cols[0].selectbox("Select Models", ["Gemini", "OpenAI"])
     api_key = container.text_input("### LLM API Key")
 
     return llm_option, api_key

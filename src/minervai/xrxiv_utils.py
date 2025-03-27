@@ -11,8 +11,8 @@ from paperscraper.xrxiv.xrxiv_query import XRXivQuery
 
 
 def get_metadata_from_archive(
-    dump_path: str, start_date: str, end_date: str, archive: str
-) -> int:
+    dump_path: str, start_date: str, end_date: str, archive_str: str
+) -> tuple[int, list[str]]:
     """
     Retrieves metadata from the X-rxiv database.
 
@@ -38,7 +38,7 @@ def get_metadata_from_archive(
         "biorxiv": biorxiv,
         "arxiv": arxiv,
     }
-    archive = archives[archive]
+    archive = archives[archive_str]
 
     current_date = datetime.strptime(start_date, "%Y-%m-%d")
     final_date = datetime.strptime(end_date, "%Y-%m-%d")
@@ -85,7 +85,6 @@ def get_metadata_from_archive(
     print(f"Combined file created: {dump_path}")
     print(f"Total number of lines: {papers_number}")
     return papers_number, failed_dates
-
 
 
 def filter_metadata_from_archive(
