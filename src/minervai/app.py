@@ -1,8 +1,8 @@
 import os
 
 import streamlit as st
-from langchain.chat_models import ChatOpenAI
-from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain_openai import ChatOpenAI
+from langchain_openai import OpenAIEmbeddings
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
 
@@ -26,10 +26,10 @@ os.makedirs(VECTOR_DB, exist_ok=True)
 
 def get_info():
     container = st.container(border=True)
-    container.markdown("### LLM API ")
+    container.markdown("### Model API ")
     cols = container.columns(2, vertical_alignment="bottom")
-    llm_option = cols[0].selectbox("Select Models", ["Gemini", "OpenAI"])
-    api_key = container.text_input("### LLM API Key")
+    llm_option = cols[0].selectbox("Select model to use", ["Gemini", "OpenAI"])
+    api_key = container.text_input("### API Key")
 
     return llm_option, api_key
 
@@ -39,7 +39,7 @@ def add_documents_from_archive(embeddings):
     container.markdown(
         """
                        ### Add papers from X-rxiv: \n
-                       - Select an archive and get the papers based on the
+                       - Select an archive and get the papers metadata based on the
                        publishing date. Note that this can take more than
                        1 hour.
                        - Filter the papers based on keywords and add them to
@@ -171,7 +171,7 @@ def main():
         if api_key:
             if llm_model == "OpenAI":
                 embeddings = OpenAIEmbeddings(
-                    model="gpt-3.5-turbo", openai_api_key=api_key
+                    model="text-embedding-3-small", openai_api_key=api_key
                 )
                 llm = ChatOpenAI(
                     model="gpt-3.5-turbo", openai_api_key=api_key, temperature=0.9
@@ -183,8 +183,6 @@ def main():
                 llm = ChatGoogleGenerativeAI(
                     model="gemini-1.5-flash", google_api_key=api_key, temperature=0.9
                 )
-            # if not os.path.exists(vector_db_path):
-            #     os.makedirs(vector_db_path)
             vectorstore = vector_db(VECTOR_DB, embeddings)
             retriever = vectorstore.as_retriever()
             add_documents_from_archive(embeddings)
