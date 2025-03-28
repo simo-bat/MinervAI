@@ -1,10 +1,9 @@
 import os
 
 import streamlit as st
-from langchain_openai import ChatOpenAI
-from langchain_openai import OpenAIEmbeddings
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
 from minervai.chain import conversational_rag_chain
 from minervai.data import update_vector_db, vector_db
